@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <!-- Include jsQR library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+</head>
+<body>
+    <h1>QR Code Scanner</h1>
+    <!-- Container for video stream and canvas -->
+    <video id="video" width="800px" height="400px" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="result"></div>
+
+    <script>
+        // Get video stream and decode QR code
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+                video.play();
+
+                // Function to decode QR code
+                function decodeQRCode() {
+                    var canvas = document.getElementById('canvas');
+                    var context = canvas.getContext('2d');
+                    var video = document.getElementById('video');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code) {
+                        document.getElementById('result').textContent = 'Decoded Text: ' + code.data;
+                    } else {
+                        document.getElementById('result').textContent = 'No QR code detected';
+                    }
+                }
+
+                // Call decodeQRCode function repeatedly
+                setInterval(decodeQRCode, 1000);
+            })
+            .catch(function(err) {
+                console.error('Error accessing camera: ', err);
+            });
+    </script>
+</body>
+</html>
